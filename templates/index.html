@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Wildberries</title>
+</head>
+<body>
+<div class="container">
+    <h1>Информация о заказе</h1>
+    <label for="orderUidInput"></label>
+    <input type="text" id="orderUidInput" placeholder="Введите order_uid">
+    <button id="goToOrderButton">Перейти к заказу</button>
+    <div class="error-container" id="errorContainer"></div>
+    <div class="order-container" id="orderContainer"></div>
+</div>
+
+<script>
+    const orderUidInput = document.querySelector('#orderUidInput');
+    const goToOrderButton = document.querySelector('#goToOrderButton');
+    const errorContainer = document.querySelector('#errorContainer');
+    const orderContainer = document.querySelector('#orderContainer');
+
+    goToOrderButton.addEventListener('click', function () {
+        const orderUid = orderUidInput.value;
+        if (orderUid) {
+            fetch(`/order/${orderUid}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        errorContainer.textContent = data.error;
+                        errorContainer.style.display = 'block';
+                        orderContainer.style.display = 'none';
+                    } else {
+                        // Оформление основного блока с информацией о заказе
+                        orderContainer.innerHTML = `
+                                <div class="order-details">
+                                    <h2>Заказ: ${data.order_uid}</h2>
+                                    <div class="order-section">
+                                        <h3>Доставка</h3>
+                                        <p>Имя: ${data.delivery.name}</p>
+                                        <p>Телефон: ${data.delivery.phone}</p>
+                                        <p>Адрес: ${data.delivery.city}, ${data.delivery.address}, ${data.delivery.zip}</p>
+                                    </div>
+                                    <div class="order-section">
+                                        <h3>Оплата</h3>
+                                        <p>Транзакция: ${data.payment.transaction}</p>
+                                        <p>Сумма: ${data.payment.amount / 100} ${data.payment.currency}</p>
+                                        <p>Банк: ${data.payment.bank}</p>
+                                    </div>
+                                    <div class="order-section">
+                                        <h3>Товар</h3>
+                                        <p>Название: ${data.items[0].name}</p>
+                                        <p>Цена: ${data.items[0].price / 100} ${data.payment.currency}</p>
+                                        <p>Количество: ${data.items[0].size}</p>
+                                    </div>
+                                </div>
+                            `;
+                        errorContainer.style.display = 'none';
+                        orderContainer.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorContainer.textContent = "Ошибка получения данных о заказе";
+                    errorContainer.style.display = 'block';
+                    orderContainer.style.display = 'none';
+                });
+        }
+    });
+</script>
+</body>
+</html>
