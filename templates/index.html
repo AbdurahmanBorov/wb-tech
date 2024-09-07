@@ -2,18 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="./css/style.css">
     <title>Wildberries</title>
 </head>
 <body>
-<div class="container">
-    <h1>Информация о заказе</h1>
-    <label for="orderUidInput"></label>
-    <input type="text" id="orderUidInput" placeholder="Введите order_uid">
-    <button id="goToOrderButton">Перейти к заказу</button>
-    <div class="error-container" id="errorContainer"></div>
-    <div class="order-container" id="orderContainer"></div>
-</div>
+    <header>
+        <div class="logo">Wildberries</div>
+        <nav>
+            <ul class="nav_list">
+                <li class="nav_link"><a href="#">Главная</a></li>
+                <li class="nav_link"><a href="#">О нас</a></li>
+                <li class="nav_link"><a href="#">Контакты</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>Поиск заказа</h2>
+        <label for="orderUidInput"></label>
+        <div class="input-container">
+            <input type="text" id="orderUidInput" placeholder="Введите order_uid">
+            <button id="goToOrderButton">Найти заказ</button>
+        </div>
+        <div class="error-container" id="errorContainer">Ошибка получения данных о заказе</div>
+        <div class="order-container" id="orderContainer"></div>
+    </div>
 
 <script>
     const orderUidInput = document.querySelector('#orderUidInput');
@@ -40,19 +53,41 @@
                                         <h3>Доставка</h3>
                                         <p>Имя: ${data.delivery.name}</p>
                                         <p>Телефон: ${data.delivery.phone}</p>
-                                        <p>Адрес: ${data.delivery.city}, ${data.delivery.address}, ${data.delivery.zip}</p>
+                                        <p>Email: ${data.delivery.email}</p>
+                                        <p>Адрес: ${data.delivery.city}, ${data.delivery.address}, ${data.delivery.zip}, ${data.delivery.region}</p>
                                     </div>
                                     <div class="order-section">
                                         <h3>Оплата</h3>
                                         <p>Транзакция: ${data.payment.transaction}</p>
-                                        <p>Сумма: ${data.payment.amount / 100} ${data.payment.currency}</p>
+                                        <p>Сумма: ${(data.payment.amount / 100).toFixed(2)} ${data.payment.currency}</p>
                                         <p>Банк: ${data.payment.bank}</p>
+                                        <p>Стоимость доставки: ${(data.payment.delivery_cost / 100).toFixed(2)} ${data.payment.currency}</p>
+                                        <p>Всего товаров: ${(data.payment.goods_total / 100).toFixed(2)} ${data.payment.currency}</p>
+                                        <p>Таможенный сбор: ${(data.payment.custom_fee / 100).toFixed(2)} ${data.payment.currency}</p>
                                     </div>
                                     <div class="order-section">
-                                        <h3>Товар</h3>
-                                        <p>Название: ${data.items[0].name}</p>
-                                        <p>Цена: ${data.items[0].price / 100} ${data.payment.currency}</p>
-                                        <p>Количество: ${data.items[0].size}</p>
+                                        <h3>Товары</h3>
+                                        ${data.items.map(item => `
+                                            <div class="order-item">
+                                                <p>Название: ${item.name}</p>
+                                                <p>Цена: ${(item.price / 100).toFixed(2)} ${data.payment.currency}</p>
+                                                <p>Скидка: ${item.sale}%</p>
+                                                <p>Итоговая цена: ${(item.total_price / 100).toFixed(2)} ${data.payment.currency}</p>
+                                                <p>Бренд: ${item.brand}</p>
+                                                <p>Размер: ${item.size}</p>
+                                                <p>Статус: ${item.status}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="order-section">
+                                        <h3>Прочая информация</h3>
+                                        <p>Локаль: ${data.locale}</p>
+                                        <p>Клиент: ${data.customer_id}</p>
+                                        <p>Служба доставки: ${data.delivery_service}</p>
+                                        <p>Shardkey: ${data.shardkey}</p>
+                                        <p>SM ID: ${data.sm_id}</p>
+                                        <p>Дата создания: ${new Date(data.date_created).toLocaleString()}</p>
+                                        <p>OOF Shard: ${data.oof_shard}</p>
                                     </div>
                                 </div>
                             `;
@@ -65,6 +100,10 @@
                     errorContainer.style.display = 'block';
                     orderContainer.style.display = 'none';
                 });
+        } else {
+            errorContainer.textContent = "Введите order_uid";
+            errorContainer.style.display = 'block';
+            orderContainer.style.display = 'none';
         }
     });
 </script>
